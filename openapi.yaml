@@ -4,6 +4,10 @@ info:
   version: 1.0.0
   description: Simple RESTful API for shortening URLs.
 
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
 paths:
   /shorten:
     post:

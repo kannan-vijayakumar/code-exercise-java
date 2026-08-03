@@ -10,7 +10,7 @@ public class ShortUrlProperties {
     private String baseUrl;
 
     public String getBaseUrl() {
-        return baseUrl;
+        return baseUrl.replaceAll("/+$", "");
     }
 
     public void setBaseUrl(String baseUrl) {
