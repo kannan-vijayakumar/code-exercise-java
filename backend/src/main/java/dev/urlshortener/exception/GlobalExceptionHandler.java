@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.BAD_REQUEST, "ALIAS_ALREADY_EXISTS", exception.getMessage());
     }
 
+    @ExceptionHandler(AliasNotFoundException.class)
+    public ResponseEntity<ApiErrorResponse> handleAliasNotFound(AliasNotFoundException exception) {
+        return error(HttpStatus.NOT_FOUND, "ALIAS_NOT_FOUND", exception.getMessage());
+    }
+
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ApiErrorResponse> handleUnreadableRequest(HttpMessageNotReadableException exception) {
         return error(HttpStatus.BAD_REQUEST, "INVALID_REQUEST", "Request body must be valid JSON");

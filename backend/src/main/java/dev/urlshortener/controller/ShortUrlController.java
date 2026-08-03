@@ -4,11 +4,16 @@ import dev.urlshortener.dto.ShortenUrlRequest;
 import dev.urlshortener.dto.ShortenUrlResponse;
 import dev.urlshortener.service.ShortUrlService;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.net.URI;
 
 @RestController
 @RequestMapping
@@ -24,5 +29,12 @@ public class ShortUrlController {
     @ResponseStatus(HttpStatus.CREATED)
     public ShortenUrlResponse shorten(@RequestBody ShortenUrlRequest request) {
         return shortUrlService.shorten(request);
+    }
+
+    @GetMapping("/{alias}")
+    public ResponseEntity<Void> redirect(@PathVariable String alias) {
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .location(URI.create(shortUrlService.getOriginalUrl(alias)))
+                .build();
     }
 }

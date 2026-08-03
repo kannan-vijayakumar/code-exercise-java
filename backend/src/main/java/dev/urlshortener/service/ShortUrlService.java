@@ -6,6 +6,7 @@ import dev.urlshortener.dto.ShortenUrlResponse;
 import dev.urlshortener.entity.ShortenedUrl;
 import dev.urlshortener.exception.AliasAlreadyExistsException;
 import dev.urlshortener.exception.AliasGenerationException;
+import dev.urlshortener.exception.AliasNotFoundException;
 import dev.urlshortener.repository.ShortenedUrlRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -43,6 +44,12 @@ public class ShortUrlService {
         return Optional.ofNullable(request.customAlias())
                 .map(alias -> saveCustomAlias(alias, request.fullUrl()))
                 .orElseGet(() -> saveGeneratedAlias(request.fullUrl()));
+    }
+
+    public String getOriginalUrl(String alias) {
+        return shortenedUrlRepository.findByAlias(alias)
+                .map(ShortenedUrl::getOriginalUrl)
+                .orElseThrow(() -> new AliasNotFoundException(alias));
     }
 
     private ShortenUrlResponse saveCustomAlias(String alias, String fullUrl) {
