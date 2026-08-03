@@ -1,3 +1,14 @@
 spring:
   application:
     name: url-shortener-backend
+  datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/url_shortener}
+    username: ${DATABASE_USERNAME:url_shortener}
+    password: ${DATABASE_PASSWORD:url_shortener}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+  flyway:
+    enabled: true
+    locations: classpath:db/migration

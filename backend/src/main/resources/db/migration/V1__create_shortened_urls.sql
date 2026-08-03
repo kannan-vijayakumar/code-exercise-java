@@ -1,0 +1,6 @@
+CREATE TABLE shortened_urls (
+    id UUID PRIMARY KEY,
+    alias VARCHAR(100) NOT NULL UNIQUE,
+    original_url TEXT NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
