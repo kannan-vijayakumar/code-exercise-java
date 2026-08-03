@@ -2,9 +2,11 @@ package dev.urlshortener.controller;
 
 import dev.urlshortener.dto.ShortenUrlRequest;
 import dev.urlshortener.dto.ShortenUrlResponse;
+import dev.urlshortener.dto.ShortenedUrlResponse;
 import dev.urlshortener.service.ShortUrlService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequestMapping
@@ -36,5 +39,16 @@ public class ShortUrlController {
         return ResponseEntity.status(HttpStatus.FOUND)
                 .location(URI.create(shortUrlService.getOriginalUrl(alias)))
                 .build();
+    }
+
+    @GetMapping("/urls")
+    public List<ShortenedUrlResponse> listUrls() {
+        return shortUrlService.listUrls();
+    }
+
+    @DeleteMapping("/{alias}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable String alias) {
+        shortUrlService.delete(alias);
     }
 }

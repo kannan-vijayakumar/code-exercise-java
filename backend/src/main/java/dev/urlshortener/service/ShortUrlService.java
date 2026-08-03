@@ -3,6 +3,7 @@ package dev.urlshortener.service;
 import dev.urlshortener.config.ShortUrlProperties;
 import dev.urlshortener.dto.ShortenUrlRequest;
 import dev.urlshortener.dto.ShortenUrlResponse;
+import dev.urlshortener.dto.ShortenedUrlResponse;
 import dev.urlshortener.entity.ShortenedUrl;
 import dev.urlshortener.exception.AliasAlreadyExistsException;
 import dev.urlshortener.exception.AliasGenerationException;
@@ -11,6 +12,7 @@ import dev.urlshortener.repository.ShortenedUrlRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -50,6 +52,22 @@ public class ShortUrlService {
         return shortenedUrlRepository.findByAlias(alias)
                 .map(ShortenedUrl::getOriginalUrl)
                 .orElseThrow(() -> new AliasNotFoundException(alias));
+    }
+
+    public List<ShortenedUrlResponse> listUrls() {
+        return shortenedUrlRepository.findAll().stream()
+                .map(shortenedUrl -> new ShortenedUrlResponse(
+                        shortenedUrl.getAlias(),
+                        shortenedUrl.getOriginalUrl(),
+                        "%s/%s".formatted(shortUrlProperties.getBaseUrl(), shortenedUrl.getAlias())
+                ))
+                .toList();
+    }
+
+    public void delete(String alias) {
+        ShortenedUrl shortenedUrl = shortenedUrlRepository.findByAlias(alias)
+                .orElseThrow(() -> new AliasNotFoundException(alias));
+        shortenedUrlRepository.delete(shortenedUrl);
     }
 
     private ShortenUrlResponse saveCustomAlias(String alias, String fullUrl) {

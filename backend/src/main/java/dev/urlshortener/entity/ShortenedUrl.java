@@ -29,27 +29,15 @@ public class ShortenedUrl {
     @Column(name = "created_at", nullable = false, updatable = false)
     private OffsetDateTime createdAt;
 
-    protected ShortenedUrl() {
-    }
+    protected ShortenedUrl() {}
 
     public ShortenedUrl(String alias, String originalUrl) {
         this.alias = alias;
         this.originalUrl = originalUrl;
     }
 
-    public UUID getId() {
-        return id;
-    }
-
-    public String getAlias() {
-        return alias;
-    }
-
-    public String getOriginalUrl() {
-        return originalUrl;
-    }
-
-    public OffsetDateTime getCreatedAt() {
-        return createdAt;
-    }
+    public UUID getId() { return id; }
+    public String getAlias() { return alias; }
+    public String getOriginalUrl() { return originalUrl; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
 }
