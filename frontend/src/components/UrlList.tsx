@@ -125,12 +125,7 @@ function UrlList({ refreshKey }: UrlListProps) {
       )}
 
       {!isLoading && error === null && urls.length === 0 && (
-        <p className="govuk-body">
-          You have not created any short URLs yet.{' '}
-          <a className="govuk-link" href="#shorten-form">
-            Create your first short URL.
-          </a>
-        </p>
+        <p className="govuk-body">You have not created any short URLs yet.</p>
       )}
 
       {!isLoading && error === null && urls.length > 0 && (
