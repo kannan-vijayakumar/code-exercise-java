@@ -8,9 +8,12 @@ React/Vite frontend styled with the GOV.UK Design System.
 - Create short URLs with generated aliases or custom aliases.
 - Reuse an existing generated short URL for repeated destinations.
 - Redirect short URLs to their original destination.
-- List and delete saved URLs.
+- List saved URLs newest first, copy short URLs, and delete mappings with confirmation.
 - Persist mappings in PostgreSQL using Flyway migrations.
 - Validate URLs and aliases with consistent API errors.
+- Provide responsive, accessible GOV.UK-styled user interfaces.
+- Cover frontend behavior with coverage-enforced tests and backend behavior with unit and
+  PostgreSQL-backed integration tests.
 - Run the complete stack with Docker Compose.
 
 ## Architecture
@@ -57,24 +60,6 @@ Stop the stack:
 docker compose down
 ```
 
-### Restarting services
-
-The frontend Nginx container resolves the backend hostname when it starts. If
-all services are restarted together, Nginx can occasionally start before the
-backend is available on Docker's internal network and exit with:
-
-```text
-host not found in upstream "backend"
-```
-
-Start the backend first, wait until it responds, then start the frontend:
-
-```bash
-docker compose up -d backend
-curl --fail http://localhost:8081/urls
-docker compose up -d frontend
-```
-
 ## Run locally
 
 Prerequisites:
@@ -101,7 +86,7 @@ Start the frontend in another terminal:
 
 ```bash
 cd frontend
-npm install
+npm ci
 npm run dev
 ```
 
@@ -127,23 +112,13 @@ Opening a generated short URL redirects to its stored destination.
 | `DATABASE_PASSWORD` | `url_shortener` | PostgreSQL password |
 | `SHORT_URL_BASE_URL` | `http://localhost:8080` | Public base URL used when returning short URLs |
 
-Application logs default to `INFO` for all packages. Destination URLs are
-intentionally not written to logs because they may contain sensitive query
-parameters.
-
-All handled exceptions are logged with their full stack trace:
-
-- Client errors (4xx) are logged at `INFO`.
-- Server errors (5xx) are logged at `ERROR`.
-- Alias collision retries in `ShortUrlService` are logged at `DEBUG`.
-
 ## Validation and assumptions
 
 - URLs without a scheme are normalized to `https://`; for example,
   `google.com` becomes `https://google.com`.
 - Only valid public HTTP and HTTPS URLs are accepted.
-- Custom aliases must contain 3 to 50 letters, numbers, hyphens, or
-  underscores.
+- Custom aliases must be 3–50 characters long and contain only letters,
+  numbers, hyphens (-), or underscores (_).
 - Repeating a URL without a custom alias returns its earliest generated
   mapping. A supplied custom alias always creates a separate mapping unless
   that alias is already taken.
@@ -162,17 +137,28 @@ mvn test
 mvn spotless:check
 ```
 
+`mvn test` runs PostgreSQL Testcontainers integration tests, so Docker Desktop
+must be running.
+
 Frontend:
 
 ```bash
 cd frontend
+npm run test:coverage
 npm run build
 npm run lint
 ```
 
+## Continuous integration
+
+GitHub Actions runs independent backend and frontend jobs in parallel on every
+push and pull request. The backend job checks formatting, runs unit and
+PostgreSQL-backed integration tests, builds the JAR, and builds its Docker
+image. The frontend job lints, runs coverage-enforced tests, builds the
+application, and builds its Docker image.
+
 ## Future improvements
 
-- Add automated unit and PostgreSQL-backed integration test coverage.
 - Add pagination for large URL lists.
 - Add authentication and ownership of URL mappings.
 - Add rate limiting and request monitoring.
