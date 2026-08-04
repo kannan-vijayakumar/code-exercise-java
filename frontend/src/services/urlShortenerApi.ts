@@ -4,6 +4,7 @@ import type {
   ShortenUrlRequest,
   ShortenUrlResponse,
 } from '../types/api'
+import logger from './logger'
 
 const API_BASE_PATH = '/api'
 
@@ -44,7 +45,8 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
   let response: Response
   try {
     response = await fetch(API_BASE_PATH + path, init)
-  } catch {
+  } catch (networkError) {
+    logger.error('Network request failed', { path }, networkError)
     throw new UrlShortenerApiError({
       code: 'NETWORK_ERROR',
       message: 'Unable to reach the URL shortener service',
@@ -52,7 +54,9 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
   }
 
   if (!response.ok) {
-    throw await toResponseError(response)
+    const error = await toResponseError(response)
+    logger.warn('API request rejected', { path, status: response.status, code: error.code })
+    throw error
   }
 
   return response
@@ -66,6 +70,7 @@ async function toResponseError(response: Response): Promise<UrlShortenerApiError
     }
   } catch {
     // Use the generic error when a non-JSON response cannot be parsed.
+    logger.warn('Failed to parse error response body', { status: response.status })
   }
 
   return new UrlShortenerApiError({
@@ -79,6 +84,7 @@ export function toUrlShortenerApiError(error: unknown): UrlShortenerApiError {
     return error
   }
 
+  logger.error('Unexpected error converted to UrlShortenerApiError', error)
   return new UrlShortenerApiError({
     code: 'REQUEST_FAILED',
     message: 'The request could not be completed',

@@ -57,6 +57,24 @@ Stop the stack:
 docker compose down
 ```
 
+### Restarting services
+
+The frontend Nginx container resolves the backend hostname when it starts. If
+all services are restarted together, Nginx can occasionally start before the
+backend is available on Docker's internal network and exit with:
+
+```text
+host not found in upstream "backend"
+```
+
+Start the backend first, wait until it responds, then start the frontend:
+
+```bash
+docker compose up -d backend
+curl --fail http://localhost:8081/urls
+docker compose up -d frontend
+```
+
 ## Run locally
 
 Prerequisites:

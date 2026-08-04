@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { copyText } from '../services/clipboard'
+import logger from '../services/logger'
 import {
   shortenUrl,
   toUrlShortenerApiError,
@@ -82,6 +83,7 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
       }
       copyResetTimeoutRef.current = window.setTimeout(() => setIsCopied(false), 2000)
     } catch (caughtError) {
+      logger.warn('Failed to copy short URL to clipboard', caughtError)
       setCopyError(
         caughtError instanceof Error
           ? caughtError.message

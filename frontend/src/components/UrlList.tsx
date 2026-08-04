@@ -6,6 +6,7 @@ import {
   type UrlShortenerApiError,
 } from '../services/urlShortenerApi'
 import { copyText } from '../services/clipboard'
+import logger from '../services/logger'
 import type { ShortenedUrl } from '../types/api'
 
 interface UrlListProps {
@@ -97,6 +98,7 @@ function UrlList({ refreshKey }: UrlListProps) {
       }
       copyResetTimeoutRef.current = window.setTimeout(() => setCopiedAlias(null), 2000)
     } catch {
+      logger.warn('Failed to copy short URL to clipboard', { alias })
       setCopyErrorAlias(alias)
     }
   }
