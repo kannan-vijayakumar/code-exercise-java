@@ -12,6 +12,7 @@ import dev.urlshortener.repository.ShortenedUrlRepository;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ShortUrlService {
@@ -71,6 +72,7 @@ public class ShortUrlService {
                 .toList();
     }
 
+    @Transactional
     public void delete(String alias) {
         ShortenedUrl shortenedUrl =
                 shortenedUrlRepository
