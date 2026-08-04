@@ -17,7 +17,7 @@ public class UrlValidationService {
     private static final Pattern SCHEME_PREFIX = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*://");
     private static final UrlValidator URL_VALIDATOR =
             new UrlValidator(new String[] {"http", "https"});
-    static final Set<String> RESERVED_ALIASES = Set.of("shorten", "urls");
+    static final Set<String> RESERVED_ALIASES = Set.of("urls");
 
     public String normalizeAndValidateFullUrl(String fullUrl) {
         if (fullUrl == null || fullUrl.isBlank()) {
