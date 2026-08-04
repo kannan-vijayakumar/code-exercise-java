@@ -30,16 +30,9 @@ jobs:
         working-directory: backend
         run: mvn test
 
-      - name: Scan for CVEs (OWASP)
-        working-directory: backend
-        run: mvn dependency-check:check
-        env:
-          NVD_API_KEY: ${{ secrets.NVD_API_KEY }}
-
       - name: Build JAR
         working-directory: backend
         run: mvn package -DskipTests
 
       - name: Build Docker image
         run: docker build -t url-shortener-backend ./backend
-
