@@ -30,6 +30,14 @@ The Vite development server proxies `/api` calls to the local backend. In
 Docker, Nginx serves the frontend and proxies API and short-link requests to
 the backend, so browser CORS configuration is not required.
 
+### Request flow
+
+```
+Browser → Nginx → React static assets
+        → Spring Boot API → PostgreSQL
+        → short alias redirect → Spring Boot
+```
+
 ## Project structure
 
 ```text
