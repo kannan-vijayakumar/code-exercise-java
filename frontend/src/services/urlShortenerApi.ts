@@ -52,13 +52,13 @@ async function request(path: string, init?: RequestInit): Promise<Response> {
   }
 
   if (!response.ok) {
-    throw await toApiError(response)
+    throw await toResponseError(response)
   }
 
   return response
 }
 
-async function toApiError(response: Response): Promise<UrlShortenerApiError> {
+async function toResponseError(response: Response): Promise<UrlShortenerApiError> {
   try {
     const error = (await response.json()) as ApiError
     if (typeof error.code === 'string' && typeof error.message === 'string') {
@@ -66,6 +66,17 @@ async function toApiError(response: Response): Promise<UrlShortenerApiError> {
     }
   } catch {
     // Use the generic error when a non-JSON response cannot be parsed.
+  }
+
+  return new UrlShortenerApiError({
+    code: 'REQUEST_FAILED',
+    message: 'The request could not be completed',
+  })
+}
+
+export function toUrlShortenerApiError(error: unknown): UrlShortenerApiError {
+  if (error instanceof UrlShortenerApiError) {
+    return error
   }
 
   return new UrlShortenerApiError({

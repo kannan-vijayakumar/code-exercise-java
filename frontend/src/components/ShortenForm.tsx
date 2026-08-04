@@ -1,7 +1,9 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { copyText } from '../services/clipboard'
 import {
   shortenUrl,
-  UrlShortenerApiError,
+  toUrlShortenerApiError,
+  type UrlShortenerApiError,
 } from '../services/urlShortenerApi'
 
 interface ShortenFormProps {
@@ -14,6 +16,10 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
   const [error, setError] = useState<UrlShortenerApiError | null>(null)
   const [shortUrl, setShortUrl] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isCopied, setIsCopied] = useState(false)
+  const [copyError, setCopyError] = useState<string | null>(null)
+  const errorSummaryRef = useRef<HTMLDivElement>(null)
+  const copyResetTimeoutRef = useRef<number | null>(null)
 
   const fullUrlError = error?.code === 'INVALID_URL' ? error.message : null
   const aliasError =
@@ -24,11 +30,26 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
     error !== null && fullUrlError === null && aliasError === null
       ? error.message
       : null
+  useEffect(() => {
+    if (error !== null) {
+      errorSummaryRef.current?.focus()
+    }
+  }, [error])
+
+  useEffect(() => {
+    return () => {
+      if (copyResetTimeoutRef.current !== null) {
+        window.clearTimeout(copyResetTimeoutRef.current)
+      }
+    }
+  }, [])
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
     setShortUrl(null)
+    setIsCopied(false)
+    setCopyError(null)
     setIsSubmitting(true)
 
     try {
@@ -37,25 +58,40 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
         customAlias: customAlias.trim() || undefined,
       })
       setShortUrl(response.shortUrl)
+      setFullUrl('')
+      setCustomAlias('')
       onShortened()
     } catch (caughtError) {
-      if (caughtError instanceof UrlShortenerApiError) {
-        setError(caughtError)
-      } else {
-        setError(
-          new UrlShortenerApiError({
-            code: 'REQUEST_FAILED',
-            message: 'The request could not be completed',
-          }),
-        )
-      }
+      setError(toUrlShortenerApiError(caughtError))
     } finally {
       setIsSubmitting(false)
     }
   }
 
+  async function handleCopy() {
+    if (shortUrl === null) {
+      return
+    }
+
+    setCopyError(null)
+    try {
+      await copyText(shortUrl)
+      setIsCopied(true)
+      if (copyResetTimeoutRef.current !== null) {
+        window.clearTimeout(copyResetTimeoutRef.current)
+      }
+      copyResetTimeoutRef.current = window.setTimeout(() => setIsCopied(false), 2000)
+    } catch (caughtError) {
+      setCopyError(
+        caughtError instanceof Error
+          ? caughtError.message
+          : 'Unable to copy the short URL',
+      )
+    }
+  }
+
   return (
-    <section aria-labelledby="shorten-heading">
+    <section aria-labelledby="shorten-heading" id="shorten-form">
       <h2 className="govuk-heading-l" id="shorten-heading">
         Shorten a URL
       </h2>
@@ -64,6 +100,7 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
         <div
           className="govuk-error-summary"
           aria-labelledby="error-summary-title"
+          ref={errorSummaryRef}
           role="alert"
           tabIndex={-1}
         >
@@ -100,6 +137,20 @@ function ShortenForm({ onShortened }: ShortenFormProps) {
                 {shortUrl}
               </a>
             </p>
+            <div className="app-button-row">
+              <button
+                className="govuk-button govuk-button--secondary app-copy-button"
+                onClick={() => void handleCopy()}
+                type="button"
+              >
+                {isCopied ? 'Copied' : 'Copy short URL'}
+              </button>
+            </div>
+            {copyError !== null && (
+              <p className="govuk-error-message">
+                <span className="govuk-visually-hidden">Error:</span> {copyError}
+              </p>
+            )}
           </div>
         </div>
       )}

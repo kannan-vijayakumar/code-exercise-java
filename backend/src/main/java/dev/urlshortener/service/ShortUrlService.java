@@ -58,7 +58,7 @@ public class ShortUrlService {
     }
 
     public List<ShortenedUrlResponse> listUrls() {
-        return shortenedUrlRepository.findAll().stream()
+        return shortenedUrlRepository.findAllByOrderByCreatedAtDesc().stream()
                 .map(
                         shortenedUrl ->
                                 new ShortenedUrlResponse(

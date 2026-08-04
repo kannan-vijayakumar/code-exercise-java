@@ -7,13 +7,31 @@ function App() {
 
   return (
     <>
+      <a className="govuk-skip-link" href="#main-content">
+        Skip to main content
+      </a>
       <header className="govuk-header" role="banner">
-        <div className="govuk-width-container govuk-header__container">
-          <div className="govuk-header__logo">
+        <div className="app-header__container govuk-width-container govuk-header__container">
+          <div className="app-header__brand govuk-header__logo">
             <a className="govuk-header__link govuk-header__link--homepage" href="/">
               <span className="govuk-header__logotype-text">Shorter</span>
             </a>
+            <span className="app-header__service-name">URL shortener</span>
           </div>
+          <nav aria-label="Primary navigation">
+            <ul className="app-header__navigation govuk-list">
+              <li>
+                <a className="govuk-header__link" href="#shorten-form">
+                  Create URL
+                </a>
+              </li>
+              <li>
+                <a className="govuk-header__link" href="#urls-list">
+                  Manage links
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
       </header>
 
