@@ -49,7 +49,10 @@ class UrlValidationServiceTest {
             })
     void rejectsInvalidCustomAliases(String customAlias) {
         assertThatThrownBy(() -> urlValidationService.validateCustomAlias(customAlias))
-                .isInstanceOf(InvalidAliasException.class);
+                .isInstanceOf(InvalidAliasException.class)
+                .hasMessage(
+                        "Alias must be 3–50 characters long and contain only letters, numbers,"
+                                + " hyphens (-), or underscores (_).");
     }
 
     private static Stream<Arguments> validUrls() {

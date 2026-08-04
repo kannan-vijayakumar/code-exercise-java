@@ -10,12 +10,16 @@ import dev.urlshortener.exception.AliasGenerationException;
 import dev.urlshortener.exception.AliasNotFoundException;
 import dev.urlshortener.repository.ShortenedUrlRepository;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ShortUrlService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ShortUrlService.class);
 
     // With 62^8 possible aliases (~218 trillion), 5 retries is more than sufficient
     // unless the alias space is nearly exhausted.
@@ -42,12 +46,19 @@ public class ShortUrlService {
         urlValidationService.validateCustomAlias(request.customAlias());
 
         if (request.customAlias() != null) {
-            return saveCustomAlias(request.customAlias(), fullUrl);
+            ShortenUrlResponse response = saveCustomAlias(request.customAlias(), fullUrl);
+            LOGGER.info("Created custom short URL alias={}", request.customAlias());
+            return response;
         }
 
         return shortenedUrlRepository
                 .findFirstByOriginalUrlOrderByCreatedAtAsc(fullUrl)
-                .map(shortenedUrl -> toResponse(shortenedUrl.getAlias()))
+                .map(
+                        shortenedUrl -> {
+                            LOGGER.info(
+                                    "Reused existing short URL alias={}", shortenedUrl.getAlias());
+                            return toResponse(shortenedUrl.getAlias());
+                        })
                 .orElseGet(() -> saveGeneratedAlias(fullUrl));
     }
 
@@ -79,6 +90,7 @@ public class ShortUrlService {
                         .findByAlias(alias)
                         .orElseThrow(() -> new AliasNotFoundException(alias));
         shortenedUrlRepository.delete(shortenedUrl);
+        LOGGER.info("Deleted short URL alias={}", alias);
     }
 
     private ShortenUrlResponse saveCustomAlias(String alias, String fullUrl) {
@@ -89,6 +101,7 @@ public class ShortUrlService {
         try {
             shortenedUrlRepository.saveAndFlush(new ShortenedUrl(alias, fullUrl));
         } catch (DataIntegrityViolationException ignored) {
+            LOGGER.debug("Custom alias creation conflicted alias={}", alias, ignored);
             throw new AliasAlreadyExistsException(alias);
         }
         return toResponse(alias);
@@ -100,10 +113,20 @@ public class ShortUrlService {
             if (!shortenedUrlRepository.existsByAlias(alias)) {
                 try {
                     shortenedUrlRepository.saveAndFlush(new ShortenedUrl(alias, fullUrl));
+                    LOGGER.info("Created generated short URL alias={}", alias);
                     return toResponse(alias);
                 } catch (DataIntegrityViolationException ignored) {
-                    // Concurrent request took this alias; retry with a new one.
+                    LOGGER.debug(
+                            "Generated alias creation conflicted alias={} attempt={}",
+                            alias,
+                            attempt + 1,
+                            ignored);
                 }
+            } else {
+                LOGGER.debug(
+                        "Generated alias was already in use alias={} attempt={}",
+                        alias,
+                        attempt + 1);
             }
         }
 

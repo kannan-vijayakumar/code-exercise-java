@@ -109,6 +109,16 @@ Opening a generated short URL redirects to its stored destination.
 | `DATABASE_PASSWORD` | `url_shortener` | PostgreSQL password |
 | `SHORT_URL_BASE_URL` | `http://localhost:8080` | Public base URL used when returning short URLs |
 
+Application logs default to `INFO` for all packages. Destination URLs are
+intentionally not written to logs because they may contain sensitive query
+parameters.
+
+All handled exceptions are logged with their full stack trace:
+
+- Client errors (4xx) are logged at `INFO`.
+- Server errors (5xx) are logged at `ERROR`.
+- Alias collision retries in `ShortUrlService` are logged at `DEBUG`.
+
 ## Validation and assumptions
 
 - URLs without a scheme are normalized to `https://`; for example,
