@@ -1,0 +1,72 @@
+.page {
+  width: min(100% - 2rem, 72rem);
+  margin: 0 auto;
+  padding: 1.5rem 0 4rem;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  min-height: 3rem;
+}
+
+.brand {
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  text-decoration: none;
+}
+
+.hero {
+  max-width: 44rem;
+  padding: 6rem 0 4rem;
+}
+
+.eyebrow {
+  color: #4f46e5;
+  font-size: 0.875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: 0 0 1rem;
+  text-transform: uppercase;
+}
+
+h1 {
+  color: #111827;
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  letter-spacing: -0.055em;
+  line-height: 1;
+  margin: 0;
+}
+
+.intro {
+  color: #4b5563;
+  font-size: 1.125rem;
+  line-height: 1.65;
+  margin: 1.5rem 0 0;
+  max-width: 38rem;
+}
+
+.workspace {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 1rem 2.5rem rgb(17 24 39 / 0.06);
+  color: #6b7280;
+  padding: 2rem;
+}
+
+@media (max-width: 40rem) {
+  .page {
+    padding-top: 1rem;
+  }
+
+  .hero {
+    padding: 4rem 0 3rem;
+  }
+
+  .workspace {
+    padding: 1.5rem;
+  }
+}
