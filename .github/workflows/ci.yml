@@ -67,3 +67,6 @@ jobs:
       - name: Build frontend
         working-directory: frontend
         run: npm run build
+
+      - name: Build Docker image
+        run: docker build -t url-shortener-frontend ./frontend
