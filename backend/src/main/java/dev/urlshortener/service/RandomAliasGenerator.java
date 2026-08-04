@@ -1,13 +1,13 @@
 package dev.urlshortener.service;
 
-import org.springframework.stereotype.Component;
-
 import java.security.SecureRandom;
+import org.springframework.stereotype.Component;
 
 @Component
 public class RandomAliasGenerator implements AliasGenerator {
 
-    private static final char[] ALPHABET = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
+    private static final char[] ALPHABET =
+            "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789".toCharArray();
     private static final int ALIAS_LENGTH = 8;
 
     private final SecureRandom random = new SecureRandom();

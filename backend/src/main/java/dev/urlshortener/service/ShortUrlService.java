@@ -9,11 +9,10 @@ import dev.urlshortener.exception.AliasAlreadyExistsException;
 import dev.urlshortener.exception.AliasGenerationException;
 import dev.urlshortener.exception.AliasNotFoundException;
 import dev.urlshortener.repository.ShortenedUrlRepository;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
 
 @Service
 public class ShortUrlService {
@@ -31,8 +30,7 @@ public class ShortUrlService {
             ShortenedUrlRepository shortenedUrlRepository,
             UrlValidationService urlValidationService,
             AliasGenerator aliasGenerator,
-            ShortUrlProperties shortUrlProperties
-    ) {
+            ShortUrlProperties shortUrlProperties) {
         this.shortenedUrlRepository = shortenedUrlRepository;
         this.urlValidationService = urlValidationService;
         this.aliasGenerator = aliasGenerator;
@@ -40,33 +38,40 @@ public class ShortUrlService {
     }
 
     public ShortenUrlResponse shorten(ShortenUrlRequest request) {
-        urlValidationService.validateFullUrl(request.fullUrl());
+        String fullUrl = urlValidationService.normalizeAndValidateFullUrl(request.fullUrl());
         urlValidationService.validateCustomAlias(request.customAlias());
 
         return Optional.ofNullable(request.customAlias())
-                .map(alias -> saveCustomAlias(alias, request.fullUrl()))
-                .orElseGet(() -> saveGeneratedAlias(request.fullUrl()));
+                .map(alias -> saveCustomAlias(alias, fullUrl))
+                .orElseGet(() -> saveGeneratedAlias(fullUrl));
     }
 
     public String getOriginalUrl(String alias) {
-        return shortenedUrlRepository.findByAlias(alias)
+        return shortenedUrlRepository
+                .findByAlias(alias)
                 .map(ShortenedUrl::getOriginalUrl)
                 .orElseThrow(() -> new AliasNotFoundException(alias));
     }
 
     public List<ShortenedUrlResponse> listUrls() {
         return shortenedUrlRepository.findAll().stream()
-                .map(shortenedUrl -> new ShortenedUrlResponse(
-                        shortenedUrl.getAlias(),
-                        shortenedUrl.getOriginalUrl(),
-                        "%s/%s".formatted(shortUrlProperties.getBaseUrl(), shortenedUrl.getAlias())
-                ))
+                .map(
+                        shortenedUrl ->
+                                new ShortenedUrlResponse(
+                                        shortenedUrl.getAlias(),
+                                        shortenedUrl.getOriginalUrl(),
+                                        "%s/%s"
+                                                .formatted(
+                                                        shortUrlProperties.getBaseUrl(),
+                                                        shortenedUrl.getAlias())))
                 .toList();
     }
 
     public void delete(String alias) {
-        ShortenedUrl shortenedUrl = shortenedUrlRepository.findByAlias(alias)
-                .orElseThrow(() -> new AliasNotFoundException(alias));
+        ShortenedUrl shortenedUrl =
+                shortenedUrlRepository
+                        .findByAlias(alias)
+                        .orElseThrow(() -> new AliasNotFoundException(alias));
         shortenedUrlRepository.delete(shortenedUrl);
     }
 

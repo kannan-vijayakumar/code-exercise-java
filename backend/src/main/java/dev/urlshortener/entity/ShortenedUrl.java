@@ -6,10 +6,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.OffsetDateTime;
 import java.util.UUID;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "shortened_urls")
@@ -36,8 +35,19 @@ public class ShortenedUrl {
         this.originalUrl = originalUrl;
     }
 
-    public UUID getId() { return id; }
-    public String getAlias() { return alias; }
-    public String getOriginalUrl() { return originalUrl; }
-    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public UUID getId() {
+        return id;
+    }
+
+    public String getAlias() {
+        return alias;
+    }
+
+    public String getOriginalUrl() {
+        return originalUrl;
+    }
+
+    public OffsetDateTime getCreatedAt() {
+        return createdAt;
+    }
 }

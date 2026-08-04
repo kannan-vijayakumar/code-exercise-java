@@ -2,27 +2,33 @@ package dev.urlshortener.service;
 
 import dev.urlshortener.exception.InvalidAliasException;
 import dev.urlshortener.exception.InvalidUrlException;
-import org.springframework.stereotype.Service;
-
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.Locale;
 import java.util.regex.Pattern;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.springframework.stereotype.Service;
 
 @Service
 public class UrlValidationService {
 
     private static final Pattern ALIAS_PATTERN = Pattern.compile("^[a-zA-Z0-9_-]{3,50}$");
+    private static final Pattern SCHEME_PREFIX = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*://");
+    private static final UrlValidator URL_VALIDATOR =
+            new UrlValidator(new String[] {"http", "https"});
 
-    public void validateFullUrl(String fullUrl) {
+    public String normalizeAndValidateFullUrl(String fullUrl) {
         if (fullUrl == null || fullUrl.isBlank()) {
             throw new InvalidUrlException("A full URL is required");
         }
 
-        URI uri = parseUrl(fullUrl);
-        if (!isHttpUrlWithHost(uri)) {
-            throw new InvalidUrlException("URL must use http or https and include a host");
+        String normalizedFullUrl = fullUrl.trim();
+        if (!SCHEME_PREFIX.matcher(normalizedFullUrl).find()) {
+            normalizedFullUrl = "https://" + normalizedFullUrl;
         }
+
+        if (!URL_VALIDATOR.isValid(normalizedFullUrl)) {
+            throw new InvalidUrlException(
+                    "URL must use http or https and include a valid host such as example.com");
+        }
+        return normalizedFullUrl;
     }
 
     public void validateCustomAlias(String customAlias) {
@@ -32,26 +38,7 @@ public class UrlValidationService {
 
         if (!ALIAS_PATTERN.matcher(customAlias).matches()) {
             throw new InvalidAliasException(
-                    "Alias must contain 3 to 50 letters, numbers, hyphens, or underscores"
-            );
+                    "Alias must contain 3 to 50 letters, numbers, hyphens, or underscores");
         }
-    }
-
-    private URI parseUrl(String fullUrl) {
-        try {
-            return new URI(fullUrl);
-        } catch (URISyntaxException exception) {
-            throw new InvalidUrlException("URL must be a valid absolute URL", exception);
-        }
-    }
-
-    private boolean isHttpUrlWithHost(URI uri) {
-        if (uri.getHost() == null) {
-            return false;
-        }
-
-        String scheme = uri.getScheme();
-        return scheme != null && ("http".equals(scheme.toLowerCase(Locale.ROOT))
-                || "https".equals(scheme.toLowerCase(Locale.ROOT)));
     }
 }

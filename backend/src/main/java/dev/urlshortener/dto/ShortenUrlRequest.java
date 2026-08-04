@@ -1,4 +1,3 @@
 package dev.urlshortener.dto;
 
-public record ShortenUrlRequest(String fullUrl, String customAlias) {
-}
+public record ShortenUrlRequest(String fullUrl, String customAlias) {}

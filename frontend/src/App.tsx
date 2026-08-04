@@ -1,4 +1,10 @@
+import { useState } from 'react'
+import ShortenForm from './components/ShortenForm'
+import UrlList from './components/UrlList'
+
 function App() {
+  const [urlListRefreshKey, setUrlListRefreshKey] = useState(0)
+
   return (
     <>
       <header className="govuk-header" role="banner">
@@ -19,9 +25,10 @@ function App() {
             whenever you need.
           </p>
 
-          <section className="govuk-inset-text" aria-label="URL shortener workspace">
-            URL shortening controls will appear here.
-          </section>
+          <ShortenForm
+            onShortened={() => setUrlListRefreshKey((currentKey) => currentKey + 1)}
+          />
+          <UrlList refreshKey={urlListRefreshKey} />
         </main>
       </div>
     </>
