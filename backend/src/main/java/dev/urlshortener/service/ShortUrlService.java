@@ -10,7 +10,6 @@ import dev.urlshortener.exception.AliasGenerationException;
 import dev.urlshortener.exception.AliasNotFoundException;
 import dev.urlshortener.repository.ShortenedUrlRepository;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -41,8 +40,13 @@ public class ShortUrlService {
         String fullUrl = urlValidationService.normalizeAndValidateFullUrl(request.fullUrl());
         urlValidationService.validateCustomAlias(request.customAlias());
 
-        return Optional.ofNullable(request.customAlias())
-                .map(alias -> saveCustomAlias(alias, fullUrl))
+        if (request.customAlias() != null) {
+            return saveCustomAlias(request.customAlias(), fullUrl);
+        }
+
+        return shortenedUrlRepository
+                .findFirstByOriginalUrlOrderByCreatedAtAsc(fullUrl)
+                .map(shortenedUrl -> toResponse(shortenedUrl.getAlias()))
                 .orElseGet(() -> saveGeneratedAlias(fullUrl));
     }
 

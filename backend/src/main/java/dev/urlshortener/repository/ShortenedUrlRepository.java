@@ -9,5 +9,7 @@ public interface ShortenedUrlRepository extends JpaRepository<ShortenedUrl, UUID
 
     Optional<ShortenedUrl> findByAlias(String alias);
 
+    Optional<ShortenedUrl> findFirstByOriginalUrlOrderByCreatedAtAsc(String originalUrl);
+
     boolean existsByAlias(String alias);
 }
