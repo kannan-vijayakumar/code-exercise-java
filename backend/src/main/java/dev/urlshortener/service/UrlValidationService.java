@@ -2,6 +2,7 @@ package dev.urlshortener.service;
 
 import dev.urlshortener.exception.InvalidAliasException;
 import dev.urlshortener.exception.InvalidUrlException;
+import java.util.Set;
 import java.util.regex.Pattern;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.slf4j.Logger;
@@ -16,6 +17,7 @@ public class UrlValidationService {
     private static final Pattern SCHEME_PREFIX = Pattern.compile("^[a-zA-Z][a-zA-Z0-9+.-]*://");
     private static final UrlValidator URL_VALIDATOR =
             new UrlValidator(new String[] {"http", "https"});
+    static final Set<String> RESERVED_ALIASES = Set.of("shorten", "urls");
 
     public String normalizeAndValidateFullUrl(String fullUrl) {
         if (fullUrl == null || fullUrl.isBlank()) {
@@ -47,6 +49,12 @@ public class UrlValidationService {
             throw new InvalidAliasException(
                     "Alias must be 3–50 characters long and contain only letters, numbers, hyphens"
                             + " (-), or underscores (_).");
+        }
+
+        if (RESERVED_ALIASES.contains(customAlias.toLowerCase())) {
+            LOGGER.debug("Rejected custom alias: reason=reserved alias={}", customAlias);
+            throw new InvalidAliasException(
+                    "Alias '%s' is reserved and cannot be used.".formatted(customAlias));
         }
     }
 }

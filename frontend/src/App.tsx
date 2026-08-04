@@ -14,7 +14,12 @@ function App() {
         <div className="app-header__container govuk-width-container govuk-header__container">
           <div className="app-header__brand govuk-header__logo">
             <a className="govuk-header__link govuk-header__link--homepage" href="/">
-              <span className="govuk-header__logotype-text">Shorter</span>
+              <img
+                src="/favicon.svg"
+                alt="Shorter logo"
+                height="36"
+                style={{ verticalAlign: 'middle', marginRight: '8px' }}
+              />
             </a>
             <span className="app-header__service-name">URL shortener</span>
           </div>

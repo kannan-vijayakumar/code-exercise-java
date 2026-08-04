@@ -55,6 +55,18 @@ class UrlValidationServiceTest {
                                 + " hyphens (-), or underscores (_).");
     }
 
+    @ParameterizedTest
+    @MethodSource("reservedAliases")
+    void rejectsReservedAliases(String alias) {
+        assertThatThrownBy(() -> urlValidationService.validateCustomAlias(alias))
+                .isInstanceOf(InvalidAliasException.class)
+                .hasMessageContaining("reserved");
+    }
+
+    private static Stream<String> reservedAliases() {
+        return UrlValidationService.RESERVED_ALIASES.stream();
+    }
+
     private static Stream<Arguments> validUrls() {
         return Stream.of(
                 Arguments.of("example.com", "https://example.com"),
